@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Netlify 404 Troubleshooting Guide</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f5f5f5;
+      color: #1a1a1a;
+      line-height: 1.6;
+    }
+    header {
+      background: #00ad9f;
+      color: #fff;
+      padding: 2.5rem 2rem;
+      text-align: center;
+    }
+    header h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    header p { font-size: 1.05rem; opacity: 0.9; }
+    main {
+      max-width: 800px;
+      margin: 2.5rem auto;
+      padding: 0 1.5rem;
+    }
+    .card {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      padding: 1.75rem 2rem;
+      margin-bottom: 1.5rem;
+    }
+    .card h2 {
+      font-size: 1.2rem;
+      color: #00ad9f;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .card h2 .step {
+      background: #00ad9f;
+      color: #fff;
+      border-radius: 50%;
+      width: 1.75rem;
+      height: 1.75rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    p { margin-bottom: 0.75rem; }
+    ul, ol { margin: 0.5rem 0 0.75rem 1.25rem; }
+    li { margin-bottom: 0.4rem; }
+    code {
+      background: #f0f0f0;
+      border-radius: 4px;
+      padding: 0.15em 0.45em;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.875em;
+    }
+    pre {
+      background: #1e1e2e;
+      color: #cdd6f4;
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      margin: 0.75rem 0;
+    }
+    pre code { background: none; padding: 0; font-size: 0.9rem; color: inherit; }
+    .tag {
+      display: inline-block;
+      font-size: 0.75rem;
+      background: #eef9f8;
+      color: #00ad9f;
+      border: 1px solid #b2e8e4;
+      border-radius: 4px;
+      padding: 0.1em 0.5em;
+      margin-left: 0.5rem;
+      vertical-align: middle;
+    }
+    footer {
+      text-align: center;
+      color: #888;
+      font-size: 0.85rem;
+      padding: 2rem 1rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Netlify 404 "Page Not Found" — Fix It</h1>
+    <p>Follow this checklist to diagnose and resolve the most common causes of 404 errors on Netlify.</p>
+  </header>
+
+  <main>
+
+    <div class="card">
+      <h2><span class="step">1</span> Fix Client-Side Routing <span class="tag">React / Vue / Vite</span></h2>
+      <p>
+        If your homepage loads but refreshing or visiting a direct link like <code>/about</code> shows a 404,
+        Netlify is looking for a real file at that path instead of letting your app handle routing.
+      </p>
+      <p><strong>Solution:</strong> Add a <code>_redirects</code> file to your project's <code>public</code> folder with this rule:</p>
+      <pre><code>/*    /index.html   200</code></pre>
+      <p>Commit the file and push to trigger a new deployment. Alternatively, add the equivalent rule in <code>netlify.toml</code>:</p>
+      <pre><code>[[redirects]]
+  from = "/*"
+  to   = "/index.html"
+  status = 200</code></pre>
+    </div>
+
+    <div class="card">
+      <h2><span class="step">2</span> Verify Your Publish Directory</h2>
+      <p>
+        If even your main URL returns 404, Netlify is likely deploying an empty folder or can't find <code>index.html</code>.
+        Check <strong>Site configuration → Build &amp; deploy → Build settings</strong> and make sure the publish directory matches your framework's output:
+      </p>
+      <ul>
+        <li><strong>Vite:</strong> <code>dist</code></li>
+        <li><strong>Create React App:</strong> <code>build</code></li>
+        <li><strong>Next.js (static export):</strong> <code>out</code></li>
+        <li><strong>Plain HTML/CSS/JS:</strong> Leave blank if <code>index.html</code> is at the repo root</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2><span class="step">3</span> Use Strict Lowercase File Names</h2>
+      <p>
+        Netlify's Linux servers are case-sensitive. Your entry point must be named exactly <code>index.html</code>
+        — not <code>Index.html</code> or <code>INDEX.HTML</code> — or Netlify won't detect it.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2><span class="step">4</span> Inspect Your Deployment Archive</h2>
+      <p>
+        Still stuck? Download the deploy archive from your Netlify Dashboard (the download icon next to the deployment timestamp),
+        unzip it locally, and confirm that <code>index.html</code> is present in the root of the archive.
+        If it's missing, your build command isn't producing output where Netlify expects it.
+      </p>
+    </div>
+
+  </main>
+
+  <footer>
+    Built with Netlify &mdash; <a href="https://docs.netlify.com/resources/troubleshooting/overview/" style="color:#00ad9f">Netlify Troubleshooting Docs</a>
+  </footer>
+</body>
+</html>
